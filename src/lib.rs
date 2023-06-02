@@ -1,10 +1,10 @@
 use anyhow::{anyhow, bail};
 use nom::{
     branch::alt,
-    bytes::{complete::tag as t, streaming::is_not},
-    character::complete::{alphanumeric1, one_of, multispace0 as ws},
-    combinator::{map, map_res, recognize},
-    multi::{many1, separated_list0},
+    bytes::{complete::tag as t, complete::is_a, streaming::is_not},
+    character::complete::{alphanumeric1, multispace0 as ws},
+    combinator::{map, map_res},
+    multi::separated_list0,
     sequence::{delimited, preceded, separated_pair},
     IResult,
 };
@@ -71,12 +71,12 @@ fn hex_int(i: &str) -> IResult<&str, usize> {
     map_res(
         preceded(
             alt((t("0x"), t("0X"))),
-            recognize(many1(one_of("0123456789abcdefABCDEF"))),
+            is_a("0123456789abcdefABCDEF"),
         ),
         |out: &str| usize::from_str_radix(out, 16),
     )(i)
 }
 
 fn dec_int(i: &str) -> IResult<&str, usize> {
-    map_res(recognize(many1(one_of("0123456789"))), usize::from_str)(i)
+    map_res(is_a("0123456789"), usize::from_str)(i)
 }
